@@ -54,6 +54,8 @@ sealed class PlayerAction {
     object ToggleRepeat : PlayerAction()
     object ToggleAudioOnlyMode : PlayerAction()
     data class SeekTo(val position: Long) : PlayerAction()
+    data class SeekForward(val seconds: Int = 10) : PlayerAction()
+    data class SeekBackward(val seconds: Int = 10) : PlayerAction()
     data class SetSpeed(val speed: Float) : PlayerAction()
     data class PlayMedia(val mediaItem: MediaItem, val queue: List<MediaItem> = emptyList()) : PlayerAction()
     data class PlayQueue(val queue: List<MediaItem>, val startIndex: Int = 0) : PlayerAction()

@@ -24,7 +24,14 @@ object MediaUtils {
     fun getMediaDuration(context: Context, path: String): Long {
         return try {
             val retriever = MediaMetadataRetriever()
-            retriever.setDataSource(context, Uri.fromFile(File(path)))
+
+            // Check if path is a URI or file path
+            if (path.startsWith("content://") || path.startsWith("file://")) {
+                retriever.setDataSource(context, Uri.parse(path))
+            } else {
+                retriever.setDataSource(context, Uri.fromFile(File(path)))
+            }
+
             val duration = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
             retriever.release()
             duration?.toLongOrNull() ?: 0L

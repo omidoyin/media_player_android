@@ -1,6 +1,7 @@
 package com.mediaplayer.player
 
 import android.content.Context
+import android.util.Log
 import androidx.media3.common.MediaItem as ExoMediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
@@ -97,6 +98,8 @@ class PlayerManager @Inject constructor(
             is PlayerAction.ToggleRepeat -> toggleRepeat()
             is PlayerAction.ToggleAudioOnlyMode -> toggleAudioOnlyMode()
             is PlayerAction.SeekTo -> seekTo(action.position)
+            is PlayerAction.SeekForward -> seekForward(action.seconds)
+            is PlayerAction.SeekBackward -> seekBackward(action.seconds)
             is PlayerAction.SetSpeed -> setPlaybackSpeed(action.speed)
             is PlayerAction.PlayMedia -> playMedia(action.mediaItem, action.queue)
             is PlayerAction.PlayQueue -> playQueue(action.queue, action.startIndex)
@@ -201,6 +204,25 @@ class PlayerManager @Inject constructor(
         exoPlayer?.seekTo(position)
     }
 
+    private fun seekForward(seconds: Int) {
+        exoPlayer?.let { player ->
+            val currentPosition = player.currentPosition
+            val duration = player.duration
+            val seekAmount = seconds * 1000L // Convert to milliseconds
+            val newPosition = (currentPosition + seekAmount).coerceAtMost(duration)
+            player.seekTo(newPosition)
+        }
+    }
+
+    private fun seekBackward(seconds: Int) {
+        exoPlayer?.let { player ->
+            val currentPosition = player.currentPosition
+            val seekAmount = seconds * 1000L // Convert to milliseconds
+            val newPosition = (currentPosition - seekAmount).coerceAtLeast(0L)
+            player.seekTo(newPosition)
+        }
+    }
+
     private fun setPlaybackSpeed(speed: Float) {
         exoPlayer?.setPlaybackParameters(
             PlaybackParameters(speed)
@@ -209,15 +231,19 @@ class PlayerManager @Inject constructor(
     }
 
     private fun playMedia(mediaItem: MediaItem, queue: List<MediaItem>) {
+        Log.d("PlayerManager", "playMedia called with: ${mediaItem.title}, queue size: ${queue.size}")
         currentQueue = if (queue.isNotEmpty()) queue else listOf(mediaItem)
         val index = currentQueue.indexOfFirst { it.id == mediaItem.id }
+        Log.d("PlayerManager", "Media index in queue: $index, queue size: ${currentQueue.size}")
         playQueue(currentQueue, index)
     }
 
     private fun playQueue(queue: List<MediaItem>, startIndex: Int) {
+        Log.d("PlayerManager", "playQueue called with startIndex: $startIndex, queue size: ${queue.size}")
         currentQueue = queue
         if (startIndex in queue.indices) {
             val mediaItem = queue[startIndex]
+            Log.d("PlayerManager", "Playing item at index $startIndex: ${mediaItem.title}")
             playMediaInternal(mediaItem)
             updatePlayerState {
                 it.copy(
@@ -225,18 +251,27 @@ class PlayerManager @Inject constructor(
                     currentIndex = startIndex
                 )
             }
+        } else {
+            Log.e("PlayerManager", "Invalid startIndex: $startIndex for queue size: ${queue.size}")
         }
     }
 
     private fun playMediaInternal(mediaItem: MediaItem) {
+        Log.d("PlayerManager", "playMediaInternal called with: ${mediaItem.title}, path: ${mediaItem.path}")
+
         val exoMediaItem = ExoMediaItem.Builder()
             .setUri(mediaItem.path)
             .setMediaId(mediaItem.id)
             .build()
 
-        exoPlayer?.setMediaItem(exoMediaItem)
-        exoPlayer?.prepare()
-        exoPlayer?.play()
+        exoPlayer?.let { player ->
+            Log.d("PlayerManager", "Setting media item and preparing player")
+            player.setMediaItem(exoMediaItem)
+            player.prepare()
+            player.play()
+
+            Log.d("PlayerManager", "Player state after play(): isPlaying=${player.isPlaying}, playbackState=${player.playbackState}")
+        } ?: Log.e("PlayerManager", "ExoPlayer is null!")
 
         updatePlayerState {
             it.copy(
@@ -244,6 +279,8 @@ class PlayerManager @Inject constructor(
                 currentIndex = currentQueue.indexOfFirst { item -> item.id == mediaItem.id }
             )
         }
+
+        Log.d("PlayerManager", "Updated player state with current media: ${mediaItem.title}")
     }
 
     private fun addToQueue(mediaItem: MediaItem) {

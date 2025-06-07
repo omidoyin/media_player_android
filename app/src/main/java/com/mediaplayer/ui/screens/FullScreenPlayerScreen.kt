@@ -1,5 +1,7 @@
 package com.mediaplayer.ui.screens
 
+import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -7,6 +9,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import kotlinx.coroutines.delay
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -21,6 +24,7 @@ import androidx.media3.ui.PlayerView
 import coil.compose.AsyncImage
 import com.mediaplayer.data.models.PlayerAction
 import com.mediaplayer.ui.components.PlayerControls
+import com.mediaplayer.ui.components.VideoPlayerOverlay
 import com.mediaplayer.ui.viewmodels.MediaPlayerViewModel
 
 @Composable
@@ -36,6 +40,27 @@ fun FullScreenPlayerScreen(
     val isLandscape = configuration.screenWidthDp > configuration.screenHeightDp
     var showLyrics by remember { mutableStateOf(false) }
 
+    // Control visibility state for video player
+    var showControls by remember { mutableStateOf(true) }
+    val isVideoPlaying = playerState.currentMedia?.isVideo == true &&
+                        !playerState.audioOnlyMode &&
+                        playerState.isPlaying
+
+    // Auto-hide controls during video playback
+    LaunchedEffect(showControls, isVideoPlaying) {
+        if (showControls && isVideoPlaying) {
+            delay(3000) // Hide after 3 seconds
+            showControls = false
+        }
+    }
+
+    // Show controls when video is paused
+    LaunchedEffect(playerState.isPlaying) {
+        if (!playerState.isPlaying) {
+            showControls = true
+        }
+    }
+
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -43,19 +68,28 @@ fun FullScreenPlayerScreen(
     ) {
         playerState.currentMedia?.let { media ->
             if (media.isVideo && !playerState.audioOnlyMode) {
-                // Video player view
-                AndroidView(
-                    factory = { context ->
-                        PlayerView(context).apply {
-                            useController = false // We'll use our custom controls
-                            player = viewModel.getExoPlayerInstance()
-                        }
-                    },
-                    update = { playerView ->
-                        playerView.player = viewModel.getExoPlayerInstance()
-                    },
-                    modifier = Modifier.fillMaxSize()
-                )
+                // Video player view with overlay
+                Box(modifier = Modifier.fillMaxSize()) {
+                    AndroidView(
+                        factory = { context ->
+                            PlayerView(context).apply {
+                                useController = false // We'll use our custom controls
+                                player = viewModel.getExoPlayerInstance()
+                            }
+                        },
+                        update = { playerView ->
+                            playerView.player = viewModel.getExoPlayerInstance()
+                        },
+                        modifier = Modifier.fillMaxSize()
+                    )
+
+                    // Video player overlay for seek gestures
+                    VideoPlayerOverlay(
+                        onAction = viewModel::handlePlayerAction,
+                        onShowControls = { showControls = true },
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
             } else {
                 // Audio visualization or album art with optional lyrics
                 if (showLyrics && lyricsState.lyrics.isNotEmpty()) {
@@ -87,56 +121,64 @@ fun FullScreenPlayerScreen(
             }
         }
 
-        // Custom controls overlay
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
+        // Custom controls overlay - only show for audio or when controls are visible for video
+        val shouldShowControlsOverlay = !isVideoPlaying || showControls
+
+        AnimatedVisibility(
+            visible = shouldShowControlsOverlay,
+            enter = fadeIn(animationSpec = tween(300)),
+            exit = fadeOut(animationSpec = tween(300))
         ) {
-            // Top controls
-            Row(
+            Box(
                 modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    .fillMaxSize()
+                    .padding(16.dp)
             ) {
-                IconButton(onClick = onBack) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowBack,
-                        contentDescription = "Back",
-                        tint = Color.White
-                    )
-                }
-
-                // Lyrics toggle
-                IconButton(
-                    onClick = { showLyrics = !showLyrics },
-                    enabled = lyricsState.lyrics.isNotEmpty()
+                // Top controls
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Subtitles,
-                        contentDescription = "Toggle Lyrics",
-                        tint = if (showLyrics) Color.White else Color.White.copy(alpha = 0.6f)
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Back",
+                            tint = Color.White
+                        )
+                    }
+
+                    // Lyrics toggle
+                    IconButton(
+                        onClick = { showLyrics = !showLyrics },
+                        enabled = lyricsState.lyrics.isNotEmpty()
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Subtitles,
+                            contentDescription = "Toggle Lyrics",
+                            tint = if (showLyrics) Color.White else Color.White.copy(alpha = 0.6f)
+                        )
+                    }
+                }
+
+                // Player controls
+                Card(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color.Black.copy(alpha = 0.8f)
+                    ),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    PlayerControls(
+                        playerState = playerState,
+                        onAction = viewModel::handlePlayerAction,
+                        modifier = Modifier.padding(24.dp),
+                        showFullControls = true
                     )
                 }
-            }
-
-            // Player controls
-            Card(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = Color.Black.copy(alpha = 0.8f)
-                ),
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                PlayerControls(
-                    playerState = playerState,
-                    onAction = viewModel::handlePlayerAction,
-                    modifier = Modifier.padding(24.dp),
-                    showFullControls = true
-                )
             }
         }
     }

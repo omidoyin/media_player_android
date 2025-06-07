@@ -1,5 +1,6 @@
 package com.mediaplayer.ui.screens
 
+import android.net.Uri
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -18,6 +19,8 @@ import com.mediaplayer.ui.viewmodels.MediaTab
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
+    externalFileUri: Uri? = null,
+    onExternalFileHandled: () -> Unit = {},
     viewModel: MediaPlayerViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -25,6 +28,14 @@ fun MainScreen(
     var showSearch by remember { mutableStateOf(false) }
     var showLyrics by remember { mutableStateOf(false) }
     var showFullPlayer by remember { mutableStateOf(false) }
+
+    // Handle external file URI when it's provided
+    LaunchedEffect(externalFileUri) {
+        externalFileUri?.let { uri ->
+            viewModel.playExternalFile(uri)
+            onExternalFileHandled() // Notify that we've handled the external file
+        }
+    }
 
     when {
         showSearch -> {
