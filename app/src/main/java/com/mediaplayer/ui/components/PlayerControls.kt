@@ -1,5 +1,7 @@
 package com.mediaplayer.ui.components
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -125,22 +127,11 @@ fun PlayerControls(
 
             // Repeat
             if (showFullControls) {
-                IconButton(
-                    onClick = { onAction(PlayerAction.ToggleRepeat) }
-                ) {
-                    Icon(
-                        imageVector = when (playerState.repeatMode) {
-                            RepeatMode.OFF -> Icons.Default.Repeat
-                            RepeatMode.ALL -> Icons.Default.Repeat
-                            RepeatMode.ONE -> Icons.Default.RepeatOne
-                        },
-                        contentDescription = "Repeat",
-                        tint = if (playerState.repeatMode != RepeatMode.OFF)
-                            MaterialTheme.colorScheme.primary
-                        else
-                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                    )
-                }
+                RepeatControl(
+                    playerState = playerState,
+                    onToggleRepeat = { onAction(PlayerAction.ToggleRepeat) },
+                    onSetCustomRepeat = { count -> onAction(PlayerAction.SetCustomRepeat(count)) }
+                )
             }
         }
 
@@ -313,6 +304,77 @@ private fun SpeedControl(
                 TextButton(onClick = { showSpeedDialog = false }) {
                     Text("Close")
                 }
+            }
+        )
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun RepeatControl(
+    playerState: PlayerState,
+    onToggleRepeat: () -> Unit,
+    onSetCustomRepeat: (Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var showRepeatDialog by remember { mutableStateOf(false) }
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier
+    ) {
+        Box(
+            modifier = Modifier
+                .size(48.dp)
+                .clip(CircleShape)
+                .combinedClickable(
+                    onClick = {
+                        if (playerState.repeatMode == RepeatMode.CUSTOM) {
+                            showRepeatDialog = true
+                        } else {
+                            onToggleRepeat()
+                        }
+                    },
+                    onLongClick = {
+                        showRepeatDialog = true
+                    }
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = when (playerState.repeatMode) {
+                    RepeatMode.OFF -> Icons.Default.Repeat
+                    RepeatMode.ALL -> Icons.Default.Repeat
+                    RepeatMode.ONE -> Icons.Default.RepeatOne
+                    RepeatMode.CUSTOM -> Icons.Default.Repeat
+                },
+                contentDescription = "Repeat",
+                tint = if (playerState.repeatMode != RepeatMode.OFF)
+                    MaterialTheme.colorScheme.primary
+                else
+                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+            )
+        }
+
+        // Show repeat count for custom mode
+        if (playerState.repeatMode == RepeatMode.CUSTOM) {
+            Text(
+                text = "${playerState.currentRepeatCount + 1}/${playerState.customRepeatCount}",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(top = 2.dp)
+            )
+        }
+    }
+
+    // Repeat count dialog
+    if (showRepeatDialog) {
+        RepeatCountDialog(
+            currentCount = playerState.customRepeatCount,
+            onDismiss = { showRepeatDialog = false },
+            onConfirm = { count ->
+                onSetCustomRepeat(count)
+                showRepeatDialog = false
             }
         )
     }

@@ -9,6 +9,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.mediaplayer.data.models.PlayerAction
 import com.mediaplayer.data.models.SortOption
@@ -18,6 +19,10 @@ import com.mediaplayer.ui.components.SortDialog
 import com.mediaplayer.ui.viewmodels.MediaPlayerViewModel
 import com.mediaplayer.ui.viewmodels.PlaylistViewModel
 import androidx.hilt.navigation.compose.hiltViewModel
+import android.content.Intent
+import android.net.Uri
+import androidx.core.content.FileProvider
+import java.io.File
 
 @Composable
 fun AudioScreen(
@@ -29,10 +34,35 @@ fun AudioScreen(
     val playerState by viewModel.playerState.collectAsState()
     var currentSortOption by remember { mutableStateOf(SortOption.TITLE_ASC) }
     var showSortDialog by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
     // Apply sorting
     val sortedAudioItems = remember(audioItems, currentSortOption) {
         audioItems.sortedBy(currentSortOption)
+    }
+
+    // Share function
+    fun shareAudioFile(audioItem: com.mediaplayer.data.models.MediaItem) {
+        try {
+            val file = File(audioItem.path)
+            val uri = FileProvider.getUriForFile(
+                context,
+                "${context.packageName}.fileprovider",
+                file
+            )
+
+            val shareIntent = Intent().apply {
+                action = Intent.ACTION_SEND
+                type = "audio/*"
+                putExtra(Intent.EXTRA_STREAM, uri)
+                putExtra(Intent.EXTRA_TEXT, "Sharing: ${audioItem.displayTitle}")
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+
+            context.startActivity(Intent.createChooser(shareIntent, "Share Audio"))
+        } catch (e: Exception) {
+            // Handle error - could show a toast or snackbar
+        }
     }
 
     Column(modifier = modifier) {
@@ -149,6 +179,9 @@ fun AudioScreen(
                         },
                         onAddToPlaylist = {
                             playlistViewModel.showAddToPlaylistDialog(true, audioItem)
+                        },
+                        onShare = {
+                            shareAudioFile(audioItem)
                         },
                         isCurrentlyPlaying = playerState.currentMedia?.id == audioItem.id,
                         modifier = Modifier.fillMaxWidth()

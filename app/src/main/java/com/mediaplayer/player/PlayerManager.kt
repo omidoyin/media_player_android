@@ -96,6 +96,7 @@ class PlayerManager @Inject constructor(
             is PlayerAction.Previous -> previous()
             is PlayerAction.ToggleShuffle -> toggleShuffle()
             is PlayerAction.ToggleRepeat -> toggleRepeat()
+            is PlayerAction.SetCustomRepeat -> setCustomRepeat(action.count)
             is PlayerAction.ToggleAudioOnlyMode -> toggleAudioOnlyMode()
             is PlayerAction.SeekTo -> seekTo(action.position)
             is PlayerAction.SeekForward -> seekForward(action.seconds)
@@ -131,6 +132,10 @@ class PlayerManager @Inject constructor(
                 exoPlayer?.seekTo(0)
                 exoPlayer?.play()
             }
+            state.repeatMode == RepeatMode.CUSTOM -> {
+                exoPlayer?.seekTo(0)
+                exoPlayer?.play()
+            }
             state.shuffleEnabled -> {
                 val currentIndex = shuffledQueue.indexOfFirst { it.id == state.currentMedia?.id }
                 if (currentIndex < shuffledQueue.size - 1) {
@@ -154,6 +159,10 @@ class PlayerManager @Inject constructor(
         val state = _playerState.value
         when {
             state.repeatMode == RepeatMode.ONE -> {
+                exoPlayer?.seekTo(0)
+                exoPlayer?.play()
+            }
+            state.repeatMode == RepeatMode.CUSTOM -> {
                 exoPlayer?.seekTo(0)
                 exoPlayer?.play()
             }
@@ -189,9 +198,25 @@ class PlayerManager @Inject constructor(
         val newMode = when (currentMode) {
             RepeatMode.OFF -> RepeatMode.ALL
             RepeatMode.ALL -> RepeatMode.ONE
-            RepeatMode.ONE -> RepeatMode.OFF
+            RepeatMode.ONE -> RepeatMode.CUSTOM
+            RepeatMode.CUSTOM -> RepeatMode.OFF
         }
-        updatePlayerState { it.copy(repeatMode = newMode) }
+        updatePlayerState {
+            it.copy(
+                repeatMode = newMode,
+                currentRepeatCount = 0 // Reset repeat count when changing modes
+            )
+        }
+    }
+
+    private fun setCustomRepeat(count: Int) {
+        updatePlayerState {
+            it.copy(
+                repeatMode = RepeatMode.CUSTOM,
+                customRepeatCount = count,
+                currentRepeatCount = 0
+            )
+        }
     }
 
     private fun toggleAudioOnlyMode() {
@@ -276,7 +301,8 @@ class PlayerManager @Inject constructor(
         updatePlayerState {
             it.copy(
                 currentMedia = mediaItem,
-                currentIndex = currentQueue.indexOfFirst { item -> item.id == mediaItem.id }
+                currentIndex = currentQueue.indexOfFirst { item -> item.id == mediaItem.id },
+                currentRepeatCount = 0 // Reset repeat count for new media
             )
         }
 
@@ -331,9 +357,28 @@ class PlayerManager @Inject constructor(
         val state = _playerState.value
         when (state.repeatMode) {
             RepeatMode.ONE -> {
-                // Repeat current song
+                // Repeat current song forever
                 exoPlayer?.seekTo(0)
                 exoPlayer?.play()
+            }
+            RepeatMode.CUSTOM -> {
+                // Repeat current song for specified number of times
+                val newRepeatCount = state.currentRepeatCount + 1
+                if (newRepeatCount < state.customRepeatCount) {
+                    // Still have repeats left
+                    updatePlayerState { it.copy(currentRepeatCount = newRepeatCount) }
+                    exoPlayer?.seekTo(0)
+                    exoPlayer?.play()
+                } else {
+                    // Finished all repeats, move to next song or stop
+                    updatePlayerState { it.copy(currentRepeatCount = 0) }
+                    if (state.currentIndex < currentQueue.size - 1) {
+                        next()
+                    } else {
+                        // End of queue, stop playback
+                        updatePlayerState { it.copy(isPlaying = false) }
+                    }
+                }
             }
             RepeatMode.ALL -> {
                 // Move to next song, or restart queue if at end

@@ -174,7 +174,10 @@ fun MediaItemListItem(
     onToggleFavorite: () -> Unit,
     onAddToPlaylist: () -> Unit,
     modifier: Modifier = Modifier,
-    isCurrentlyPlaying: Boolean = false
+    isCurrentlyPlaying: Boolean = false,
+    onShare: (() -> Unit)? = null,
+    onDelete: (() -> Unit)? = null,
+    onRemoveFromPlaylist: (() -> Unit)? = null
 ) {
     ListItem(
         headlineContent = {
@@ -295,31 +298,99 @@ fun MediaItemListItem(
                     onClick = onToggleFavorite
                 ) {
                     Icon(
-                        imageVector = if (mediaItem.isFavorite) 
-                            Icons.Default.Favorite 
-                        else 
+                        imageVector = if (mediaItem.isFavorite)
+                            Icons.Default.Favorite
+                        else
                             Icons.Default.FavoriteBorder,
-                        contentDescription = if (mediaItem.isFavorite) 
-                            "Remove from favorites" 
-                        else 
+                        contentDescription = if (mediaItem.isFavorite)
+                            "Remove from favorites"
+                        else
                             "Add to favorites",
-                        tint = if (mediaItem.isFavorite) 
-                            MaterialTheme.colorScheme.primary 
-                        else 
+                        tint = if (mediaItem.isFavorite)
+                            MaterialTheme.colorScheme.primary
+                        else
                             MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                         modifier = Modifier.size(20.dp)
                     )
                 }
-                
-                IconButton(
-                    onClick = onAddToPlaylist
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.MoreVert,
-                        contentDescription = "More options",
-                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                        modifier = Modifier.size(20.dp)
-                    )
+
+                // Three dots menu
+                var showMenu by remember { mutableStateOf(false) }
+                Box {
+                    IconButton(
+                        onClick = { showMenu = true }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.MoreVert,
+                            contentDescription = "More options",
+                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+
+                    DropdownMenu(
+                        expanded = showMenu,
+                        onDismissRequest = { showMenu = false }
+                    ) {
+                        // Add to playlist
+                        DropdownMenuItem(
+                            text = { Text("Add to playlist") },
+                            onClick = {
+                                onAddToPlaylist()
+                                showMenu = false
+                            },
+                            leadingIcon = {
+                                Icon(Icons.Default.PlaylistAdd, contentDescription = null)
+                            }
+                        )
+
+                        // Share (if callback provided)
+                        onShare?.let { shareCallback ->
+                            DropdownMenuItem(
+                                text = { Text("Share") },
+                                onClick = {
+                                    shareCallback()
+                                    showMenu = false
+                                },
+                                leadingIcon = {
+                                    Icon(Icons.Default.Share, contentDescription = null)
+                                }
+                            )
+                        }
+
+                        // Remove from playlist (if callback provided)
+                        onRemoveFromPlaylist?.let { removeCallback ->
+                            DropdownMenuItem(
+                                text = { Text("Remove from playlist") },
+                                onClick = {
+                                    removeCallback()
+                                    showMenu = false
+                                },
+                                leadingIcon = {
+                                    Icon(Icons.Default.PlaylistRemove, contentDescription = null)
+                                }
+                            )
+                        }
+
+                        // Delete (if callback provided)
+                        onDelete?.let { deleteCallback ->
+                            Divider()
+                            DropdownMenuItem(
+                                text = { Text("Delete") },
+                                onClick = {
+                                    deleteCallback()
+                                    showMenu = false
+                                },
+                                leadingIcon = {
+                                    Icon(Icons.Default.Delete, contentDescription = null)
+                                },
+                                colors = MenuDefaults.itemColors(
+                                    textColor = MaterialTheme.colorScheme.error,
+                                    leadingIconColor = MaterialTheme.colorScheme.error
+                                )
+                            )
+                        }
+                    }
                 }
             }
         },

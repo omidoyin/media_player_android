@@ -354,7 +354,8 @@ private fun PlaylistDetailView(
                         mediaItem = mediaItem,
                         onPlay = { onPlayMedia(mediaItem) },
                         onToggleFavorite = { onToggleFavorite(mediaItem) },
-                        onAddToPlaylist = { onRemoveFromPlaylist(mediaItem) },
+                        onAddToPlaylist = { /* Add to another playlist */ },
+                        onRemoveFromPlaylist = { onRemoveFromPlaylist(mediaItem) },
                         isCurrentlyPlaying = currentlyPlayingId == mediaItem.id,
                         modifier = Modifier.fillMaxWidth()
                     )

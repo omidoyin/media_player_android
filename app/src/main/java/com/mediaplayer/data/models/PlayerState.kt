@@ -12,19 +12,23 @@ data class PlayerState(
     val currentIndex: Int = -1,
     val isLoading: Boolean = false,
     val error: String? = null,
-    val audioOnlyMode: Boolean = false // For playing video as audio
+    val audioOnlyMode: Boolean = false, // For playing video as audio
+    val customRepeatCount: Int = 1, // Number of times to repeat (for CUSTOM mode)
+    val currentRepeatCount: Int = 0 // Current repeat iteration
 ) {
     val progress: Float get() = if (duration > 0) currentPosition.toFloat() / duration else 0f
     
     val hasNext: Boolean get() = when {
         shuffleEnabled -> queue.isNotEmpty()
         repeatMode == RepeatMode.ONE -> true
+        repeatMode == RepeatMode.CUSTOM -> true
         else -> currentIndex < queue.size - 1
     }
-    
+
     val hasPrevious: Boolean get() = when {
         shuffleEnabled -> queue.isNotEmpty()
         repeatMode == RepeatMode.ONE -> true
+        repeatMode == RepeatMode.CUSTOM -> true
         else -> currentIndex > 0
     }
     
@@ -42,7 +46,7 @@ data class PlayerState(
 }
 
 enum class RepeatMode {
-    OFF, ONE, ALL
+    OFF, ONE, ALL, CUSTOM
 }
 
 sealed class PlayerAction {
@@ -52,6 +56,7 @@ sealed class PlayerAction {
     object Previous : PlayerAction()
     object ToggleShuffle : PlayerAction()
     object ToggleRepeat : PlayerAction()
+    data class SetCustomRepeat(val count: Int) : PlayerAction()
     object ToggleAudioOnlyMode : PlayerAction()
     data class SeekTo(val position: Long) : PlayerAction()
     data class SeekForward(val seconds: Int = 10) : PlayerAction()
