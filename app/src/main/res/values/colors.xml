@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Material 3 colors -->
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    
+    <!-- Custom Media Player colors -->
+    <color name="PlayerPrimary">#FF1DB954</color>
+    <color name="PlayerPrimaryVariant">#FF1ED760</color>
+    <color name="PlayerSecondary">#FF191414</color>
+    <color name="PlayerBackground">#FF121212</color>
+    <color name="PlayerSurface">#FF282828</color>
+    <color name="PlayerOnPrimary">#FFFFFFFF</color>
+    <color name="PlayerOnSecondary">#FFFFFFFF</color>
+    <color name="PlayerOnBackground">#FFFFFFFF</color>
+    <color name="PlayerOnSurface">#FFFFFFFF</color>
+    <color name="PlayerAccent">#FFFF6B35</color>
+    <color name="PlayerTextSecondary">#FFB3B3B3</color>
+    <color name="PlayerDivider">#FF404040</color>
+</resources>

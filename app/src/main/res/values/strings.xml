@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Media Player</string>
+
+    <!-- Player Controls -->
+    <string name="play">Play</string>
+    <string name="pause">Pause</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+    <string name="shuffle">Shuffle</string>
+    <string name="repeat">Repeat</string>
+    <string name="repeat_one">Repeat One</string>
+    <string name="repeat_all">Repeat All</string>
+    <string name="speed_control">Speed Control</string>
+    <string name="audio_only_mode">Audio Only Mode</string>
+
+    <!-- Tabs -->
+    <string name="audio">Audio</string>
+    <string name="video">Video</string>
+    <string name="playlists">Playlists</string>
+    <string name="favorites">Favorites</string>
+
+    <!-- Actions -->
+    <string name="add_to_favorites">Add to Favorites</string>
+    <string name="remove_from_favorites">Remove from Favorites</string>
+    <string name="add_to_playlist">Add to Playlist</string>
+    <string name="create_playlist">Create Playlist</string>
+    <string name="delete_playlist">Delete Playlist</string>
+    <string name="search">Search</string>
+    <string name="scan_media">Scan for Media</string>
+
+    <!-- Messages -->
+    <string name="no_audio_files">No audio files found</string>
+    <string name="no_video_files">No video files found</string>
+    <string name="no_favorites">No favorites yet</string>
+    <string name="no_playlists">No playlists yet</string>
+    <string name="empty_playlist">This playlist is empty</string>
+    <string name="scan_for_media_hint">Tap the refresh button to scan for media files</string>
+    <string name="add_favorites_hint">Tap the heart icon on any song or video to add it to favorites</string>
+    <string name="create_playlist_hint">Create your first playlist to organize your music</string>
+
+    <!-- Playlist -->
+    <string name="playlist_name">Playlist Name</string>
+    <string name="playlist_description">Description (Optional)</string>
+    <string name="create">Create</string>
+    <string name="cancel">Cancel</string>
+    <string name="close">Close</string>
+
+    <!-- Media Info -->
+    <string name="unknown_artist">Unknown Artist</string>
+    <string name="unknown_album">Unknown Album</string>
+    <string name="songs_count">%d songs</string>
+    <string name="videos_count">%d videos</string>
+    <string name="favorites_count">%d favorites</string>
+    <string name="playlists_count">%d playlists</string>
+    <string name="play_count">%d plays</string>
+
+    <!-- Permissions -->
+    <string name="permission_required">Permission Required</string>
+    <string name="storage_permission_message">This app needs storage permission to access your media files.</string>
+    <string name="grant_permission">Grant Permission</string>
+
+    <!-- Lyrics -->
+    <string name="lyrics">Lyrics</string>
+    <string name="show_lyrics">Show Lyrics</string>
+    <string name="hide_lyrics">Hide Lyrics</string>
+    <string name="edit_lyrics">Edit Lyrics</string>
+    <string name="search_lyrics_online">Search Lyrics Online</string>
+    <string name="add_lyrics_manually">Add Lyrics Manually</string>
+    <string name="no_lyrics_available">No lyrics available</string>
+    <string name="no_lyrics_found">No lyrics found</string>
+    <string name="lyrics_loading">Loading lyrics...</string>
+    <string name="lyrics_error">Failed to load lyrics</string>
+    <string name="auto_scroll">Auto Scroll</string>
+    <string name="font_size">Font Size</string>
+    <string name="time_synced_lyrics">Time-synced lyrics (LRC format)</string>
+    <string name="plain_text_lyrics">Plain text lyrics</string>
+    <string name="export_lyrics">Export lyrics</string>
+    <string name="import_lyrics">Import lyrics</string>
+    <string name="clear_lyrics">Clear lyrics</string>
+    <string name="save_lyrics">Save lyrics</string>
+    <string name="insert_timestamp">Insert Timestamp</string>
+    <string name="format_help">Format Help</string>
+    <string name="lrc_format_help">• Plain text: Just enter lyrics line by line\n• LRC format: [mm:ss.xx]lyrics text\n• Example: [01:23.45]This is a lyrics line</string>
+
+    <!-- Errors -->
+    <string name="error_loading_media">Error loading media files</string>
+    <string name="error_playing_media">Error playing media</string>
+    <string name="error_creating_playlist">Error creating playlist</string>
+    <string name="error_deleting_playlist">Error deleting playlist</string>
+    <string name="error_loading_lyrics">Error loading lyrics</string>
+    <string name="error_saving_lyrics">Error saving lyrics</string>
+    <string name="error_searching_lyrics">Error searching lyrics online</string>
+</resources>

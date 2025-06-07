@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Theme.MediaPlayer" parent="Theme.Material3.Light">
+        <!-- Customize your light theme here. -->
+        <item name="colorPrimary">@color/PlayerPrimary</item>
+        <item name="colorOnPrimary">@color/PlayerOnPrimary</item>
+        <item name="colorSecondary">@color/PlayerAccent</item>
+        <item name="android:statusBarColor">@color/PlayerPrimary</item>
+        <item name="android:navigationBarColor">@color/PlayerPrimary</item>
+    </style>
+</resources>

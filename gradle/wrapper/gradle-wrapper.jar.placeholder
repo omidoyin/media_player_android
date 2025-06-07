@@ -1,0 +1,7 @@
+# This is a placeholder for the gradle-wrapper.jar file
+# The actual gradle-wrapper.jar will be downloaded automatically when you run gradlew for the first time
+# 
+# If you need to manually download it, you can get it from:
+# https://github.com/gradle/gradle/blob/master/gradle/wrapper/gradle-wrapper.jar
+#
+# Or run: gradle wrapper --gradle-version 8.9

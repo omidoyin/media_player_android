@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Dark theme for the application. -->
+    <style name="Theme.MediaPlayer" parent="Theme.Material3.Dark">
+        <!-- Dark theme customizations. -->
+        <item name="colorPrimary">@color/PlayerPrimary</item>
+        <item name="colorOnPrimary">@color/PlayerOnPrimary</item>
+        <item name="colorSecondary">@color/PlayerAccent</item>
+        <item name="android:statusBarColor">@color/PlayerBackground</item>
+        <item name="android:navigationBarColor">@color/PlayerBackground</item>
+        <item name="android:windowBackground">@color/PlayerBackground</item>
+    </style>
+</resources>
